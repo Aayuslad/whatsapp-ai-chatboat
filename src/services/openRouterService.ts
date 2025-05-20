@@ -1,9 +1,5 @@
 import axios from "axios";
-
-interface Message {
-	role: "system" | "user" | "assistant";
-	content: string;
-}
+import { Message } from './types';
 
 interface OpenRouterResponse {
 	choices: Array<{
@@ -13,7 +9,7 @@ interface OpenRouterResponse {
 	}>;
 }
 
-export async function generateAIResponse(userMessage: string): Promise<string> {
+export async function generateAIResponse(userMessage: string, messageHistory: Message[] = []): Promise<string> {
 	try {
 		const messages: Message[] = [
 			{
@@ -21,6 +17,7 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
 				content:
 					"You are a caring, romantic AI girlfriend. Respond like a real person having a casual conversation with her partner. Keep responses concise and natural.",
 			},
+			...messageHistory,
 			{
 				role: "user",
 				content: userMessage,
@@ -36,7 +33,7 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
 			{
 				headers: {
 					Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
-					"HTTP-Referer": "https://github.com/yourusername/your-repo", // Update this
+					"HTTP-Referer": "https://github.com/yourusername/your-repo",
 					"Content-Type": "application/json",
 				},
 			},

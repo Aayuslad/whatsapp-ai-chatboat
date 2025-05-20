@@ -2,11 +2,13 @@ import { Request, Response } from "express";
 import twilio from "twilio";
 import { Twilio } from "twilio";
 import { generateAIResponse } from "../services/openRouterService";
+import { MemoryService } from "../services/memoryService";
 
-// Initialize Twilio client
+// Initialize services
 const accountSid = process.env.TWILIO_ACCOUNT_SID || "";
 const authToken = process.env.TWILIO_AUTH_TOKEN || "";
 const client: Twilio = twilio(accountSid, authToken);
+const memoryService = MemoryService.getInstance();
 
 export const handleIncomingMessage = async (req: Request, res: Response) => {
     try {
@@ -15,10 +17,25 @@ export const handleIncomingMessage = async (req: Request, res: Response) => {
 
         const allowedPhoneNumber = process.env.ALLOWED_PHONE_NUMBER;
 
+        if (!allowedPhoneNumber || !messageBody) {
+            console.error("Missing required environment variables or message body");
+            res.status(400).json({ status: "error", message: "Missing required data" });
+            return;
+        }
+
         if (senderNumber === `whatsapp:${allowedPhoneNumber}`) {
             try {
-                // Generate AI response
-                const aiResponse = await generateAIResponse(messageBody);
+                // Store user message
+                memoryService.addMessage(allowedPhoneNumber, 'user', messageBody);
+
+                // Get recent message history
+                const messageHistory = memoryService.getRecentMessages(allowedPhoneNumber);
+
+                // Generate AI response with context
+                const aiResponse = await generateAIResponse(messageBody, messageHistory);
+
+                // Store AI response
+                memoryService.addMessage(allowedPhoneNumber, 'assistant', aiResponse);
 
                 // Send the AI response back via WhatsApp
                 await client.messages.create({
