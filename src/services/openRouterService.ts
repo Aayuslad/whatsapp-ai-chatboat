@@ -30,7 +30,7 @@ export async function generateAIResponse(userMessage: string): Promise<string> {
 		const response = await axios.post<OpenRouterResponse>(
 			"https://openrouter.ai/api/v1/chat/completions",
 			{
-				model: "openai/gpt-3.5-turbo",
+				model: process.env.AI_MODEL || "meta-llama/llama-3.3-8b-instruct:free",
 				messages: messages,
 			},
 			{
