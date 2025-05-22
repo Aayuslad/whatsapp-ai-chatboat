@@ -29,13 +29,17 @@ export class SchedulerService {
 	}
 
 	private getDateString(): string {
-		const date = new Date();
-		return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+		// Get date in IST
+		const date = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+		const istDate = new Date(date);
+		return `${istDate.getFullYear()}-${String(istDate.getMonth() + 1).padStart(2, "0")}-${String(istDate.getDate()).padStart(2, "0")}`;
 	}
 
 	private getCurrentTimeInMinutes(): number {
-		const now = new Date();
-		return now.getHours() * 60 + now.getMinutes();
+		// Get time in IST
+		const date = new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" });
+		const istDate = new Date(date);
+		return istDate.getHours() * 60 + istDate.getMinutes();
 	}
 
 	private generateRandomMinutes(startHour: number, endHour: number): number {

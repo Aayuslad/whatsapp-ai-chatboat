@@ -19,16 +19,22 @@ const schedulerService = SchedulerService.getInstance();
 // Setup cleanup cron job (runs every 5 minutes)
 cron.schedule("*/5 * * * *", () => {
     memoryService.cleanupOldMessages();
+}, {
+    timezone: "Asia/Kolkata" // Run in IST
 });
 
 // Main message check every 30 minutes
 cron.schedule("*/30 * * * *", () => {
     schedulerService.checkAndSendMessages();
+}, {
+    timezone: "Asia/Kolkata" // Run in IST
 });
 
-// More frequent checks during night hours (every 15 minutes from 10 PM to midnight)
+// More frequent checks during night hours (every 15 minutes from 10 PM to midnight IST)
 cron.schedule("*/15 22-23 * * *", () => {
     schedulerService.checkAndSendMessages();
+}, {
+    timezone: "Asia/Kolkata" // Run in IST
 });
 
 // Middleware
