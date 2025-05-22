@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cron from "node-cron";
 import { webhookRouter } from "./routes/webhook";
 import { MemoryService } from "./services/memoryService";
+import { SchedulerService } from "./services/schedulerService";
 
 // Load environment variables
 dotenv.config();
@@ -11,12 +12,23 @@ dotenv.config();
 // Create Express app
 const app = express();
 
-// Initialize memory service
+// Initialize services
 const memoryService = MemoryService.getInstance();
+const schedulerService = SchedulerService.getInstance();
 
 // Setup cleanup cron job (runs every 5 minutes)
 cron.schedule("*/5 * * * *", () => {
-	memoryService.cleanupOldMessages();
+    memoryService.cleanupOldMessages();
+});
+
+// Main message check every 30 minutes
+cron.schedule("*/30 * * * *", () => {
+    schedulerService.checkAndSendMessages();
+});
+
+// More frequent checks during night hours (every 15 minutes from 10 PM to midnight)
+cron.schedule("*/15 22-23 * * *", () => {
+    schedulerService.checkAndSendMessages();
 });
 
 // Middleware
