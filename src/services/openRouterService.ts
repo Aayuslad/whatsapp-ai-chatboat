@@ -14,8 +14,7 @@ export async function generateAIResponse(userMessage: string, messageHistory: Me
 		const messages: Message[] = [
 			{
 				role: "system",
-				content:
-					"You are a caring, romantic AI girlfriend. Respond like a real person having a casual conversation with her partner. Keep responses concise and natural.",
+				content: process.env.SYSTEM_PROMPT as string	
 			},
 			...messageHistory,
 			{
