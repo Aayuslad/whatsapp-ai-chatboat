@@ -34,7 +34,7 @@ Each message will be sent after its specified delay. Keep delays reasonable (5-3
         }
 
         const response = await axios.post<OpenRouterResponse>(
-            "https://api.openrouter.ai/api/v1/chat/completions",
+            "https://openrouter.ai/api/v1/chat/completions",
             {
                 model: process.env.AI_MODEL || "meta-llama/llama-3.3-8b-instruct:free",
                 messages: messages,
