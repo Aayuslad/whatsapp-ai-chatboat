@@ -4,16 +4,7 @@ import { Message, StructuredResponse, OpenRouterResponse, StructuredMessage } fr
 export async function generateAIResponse(userMessage: string, messageHistory: Message[] = []): Promise<StructuredResponse> {
     try {
         const systemPrompt = `${process.env.SYSTEM_PROMPT || ''}
-You must respond in this JSON format:
-{
-    "messages": [
-        {
-            "content": "your message here",
-            "delaySeconds": number (delay before sending this message)
-        }
-    ]
-}
-Each message will be sent after its specified delay. Keep delays reasonable (5-30 seconds).`;
+You are a helpful AI assistant. Respond naturally to the user's messages.`;
 
         const messages: Message[] = [
             {
@@ -27,22 +18,50 @@ Each message will be sent after its specified delay. Keep delays reasonable (5-3
             },
         ];
 
-        // Validate API key
-        const apiKey = process.env.OPENROUTER_API_KEY;
-        if (!apiKey) {
-            throw new Error("OpenRouter API key is not configured");
-        }
-
         const response = await axios.post<OpenRouterResponse>(
             "https://openrouter.ai/api/v1/chat/completions",
             {
                 model: process.env.AI_MODEL || "meta-llama/llama-3.3-8b-instruct:free",
                 messages: messages,
-                // response_format: { type: "json_object" }
+                temperature: 0.7,
+                response_format: {
+                    type: "json_schema",
+                    json_schema: {
+                        name: "chat_response",
+                        strict: true,
+                        schema: {
+                            type: "object",
+                            properties: {
+                                messages: {
+                                    type: "array",
+                                    items: {
+                                        type: "object",
+                                        properties: {
+                                            content: {
+                                                type: "string",
+                                                description: "The message content"
+                                            },
+                                            delaySeconds: {
+                                                type: "number",
+                                                description: "Delay in seconds before showing this message",
+                                                minimum: 0,
+                                                maximum: 30
+                                            }
+                                        },
+                                        required: ["content", "delaySeconds"],
+                                        additionalProperties: false
+                                    }
+                                }
+                            },
+                            required: ["messages"],
+                            additionalProperties: false
+                        }
+                    }
+                }
             },
             {
                 headers: {
-                    "Authorization": `Bearer ${apiKey}`,
+                    "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
                     "HTTP-Referer": process.env.APP_URL || "http://localhost:3000",
                     "Content-Type": "application/json",
                     "x-title": process.env.APP_NAME || "AI Chat App"
