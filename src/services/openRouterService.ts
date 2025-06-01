@@ -71,6 +71,8 @@ You are a helpful AI assistant. Respond naturally to the user's messages.`;
         );
 
         const content = response.data.choices[0].message.content;
+
+		console.log("response data : ", response.data);
         
         // Try to parse the response as structured content
         try {
