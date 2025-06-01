@@ -38,7 +38,7 @@ Each message will be sent after its specified delay. Keep delays reasonable (5-3
             {
                 model: process.env.AI_MODEL || "meta-llama/llama-3.3-8b-instruct:free",
                 messages: messages,
-                response_format: { type: "json_object" }
+                // response_format: { type: "json_object" }
             },
             {
                 headers: {
